@@ -1,0 +1,38 @@
+name: MERN Deploy
+
+on:
+  push:
+    branches:
+      - main  # deploy when you push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: SSH to EC2 and Deploy
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: deploy
+        key: ${{ secrets.EC2_KEY }} # private key from GitHub secrets
+        port: 22
+        script: |
+          cd ~/mern-cicd
+          git reset --hard
+          git pull origin main
+          
+          # Backend
+          cd server
+          npm install
+          pm2 restart backend || pm2 start server.js --name backend
+
+          # Frontend
+          cd ../client
+          npm install
+          npm run build
+          sudo rm -rf /var/www/mern-app/*
+          sudo cp -r dist/* /var/www/mern-app/
