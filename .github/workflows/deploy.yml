@@ -17,7 +17,7 @@ jobs:
       uses: appleboy/ssh-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
-        username: deploy
+        username: ubuntu
         key: ${{ secrets.EC2_KEY }} # private key from GitHub secrets
         port: 22
         script: |
